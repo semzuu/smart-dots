@@ -1,22 +1,14 @@
 package main
 
-import "core:fmt"
-import "core:time"
-import "core:math/rand"
 import rl "vendor:raylib"
-
-gen_moves :: proc(moves: [][2]f32) {
-    for &move in moves {
-        move = {
-            rand.float32() * 2 - 1,
-            rand.float32() * 2 - 1,
-        }
-    }
-}
 
 main :: proc() {
     rl.SetTraceLogLevel(.ERROR)
 
+    target := Target{
+        {300, 100},
+        20,
+    }
     dot := Dot{
         alive = true,
         pos = {300, 600 - 10},
@@ -28,9 +20,10 @@ main :: proc() {
 
     for !rl.WindowShouldClose() {
         dt := rl.GetFrameTime()
-        dot_update(&dot, dt)
+        dot_update(&dot, target, dt)
         rl.BeginDrawing()
         rl.ClearBackground(rl.GetColor(0x181818ff))
+        target_draw(target)
         dot_draw(dot)
         rl.EndDrawing()
     }
