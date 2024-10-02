@@ -2,6 +2,9 @@ package main
 
 import rl "vendor:raylib"
 
+PopulationSize :: 10
+MovesCount :: 100
+
 main :: proc() {
     rl.SetTraceLogLevel(.ERROR)
 
@@ -9,22 +12,19 @@ main :: proc() {
         {300, 100},
         20,
     }
-    dot := Dot{
-        alive = true,
-        pos = {300, 600 - 10},
-    }
-    gen_moves(dot.dna.moves[:])
+    popu: Population
+    population_init(&popu)
 
     rl.InitWindow(600, 600, "Smart Dots")
     defer rl.CloseWindow()
 
     for !rl.WindowShouldClose() {
         dt := rl.GetFrameTime()
-        dot_update(&dot, target, dt)
+        population_update(&popu, target, dt)
         rl.BeginDrawing()
         rl.ClearBackground(rl.GetColor(0x181818ff))
         target_draw(target)
-        dot_draw(dot)
+        population_draw(popu)
         rl.EndDrawing()
     }
 }

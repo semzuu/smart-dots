@@ -5,7 +5,6 @@ import "core:math/rand"
 import "core:math/linalg"
 import rl "vendor:raylib"
 
-MovesCount :: 5000
 
 Dna :: struct {
     moves: [MovesCount][2]f32,
@@ -19,11 +18,14 @@ Dot :: struct {
     dna: Dna,
 }
 
-dot_draw :: proc(dot: Dot) {
+dot_draw :: proc(dot: Dot, best: bool = false) {
     color := rl.RED
+    if best {
+        color = rl.YELLOW
+        rl.DrawCircleLinesV(dot.pos, 6, rl.RAYWHITE)
+    }
     if !dot.alive do color = rl.GREEN
     rl.DrawCircleV(dot.pos, 5, color)
-    rl.DrawCircleLinesV(dot.pos, 6, rl.RAYWHITE)
 }
 
 dot_update :: proc(dot: ^Dot, target: Target, dt: f32) {
@@ -40,7 +42,6 @@ dot_update :: proc(dot: ^Dot, target: Target, dt: f32) {
             dot.finished = true
         }
     }
-    fmt.println(calculate_fitness(dot^, target))
 }
 
 gen_moves :: proc(moves: [][2]f32) {
