@@ -2,8 +2,11 @@ package main
 
 import rl "vendor:raylib"
 
-PopulationSize :: 10
-MovesCount :: 100
+PopulationSize :: 50
+MovesCount :: 500
+MutationRate :: 0.01
+Lifespan :: 10
+Speed :: 5
 
 main :: proc() {
     rl.SetTraceLogLevel(.ERROR)
