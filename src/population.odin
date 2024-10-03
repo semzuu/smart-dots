@@ -4,6 +4,20 @@ import "core:slice"
 import "core:math/rand"
 import rl "vendor:raylib"
 
+tournament_select :: proc(pool: []Dot, popu: Population) -> Dna {
+    size := 5
+    tournament: [5]Dot
+    best_fit, best_index := f32(0), 0
+    for i in 0..<size {
+        tournament[i] = rand.choice(pool)
+        if tournament[i].fitness > best_fit {
+            best_fit = tournament[i].fitness
+            best_index = i
+        }
+    }
+    return tournament[best_index].dna
+}
+
 roulette_select :: proc(pool: []Dot, popu: Population) -> Dna {
     for {
         parent := rand.int_max(PopulationSize)
@@ -37,18 +51,18 @@ next_gen :: proc(popu: ^Population) {
         popu.alive_count = PopulationSize
         popu.gen += 1
     }
-    best_moves := popu.dots[popu.best_index].dna.moves
-    dot_init(&popu.dots[0])
-    popu.dots[0].dna.moves = best_moves
-    pool := popu.dots
-    slice.sort_by(pool, proc(i, j: Dot) -> bool {
+    slice.sort_by(popu.dots, proc(i, j: Dot) -> bool {
         return i.fitness < j.fitness
     })
-    for count in 1..<PopulationSize {
-        parents: [2]Dna
-        for &parent in parents do parent = roulette_select(pool, popu^)
-        dot_init(&popu.dots[count])
-        popu.dots[count].dna = dna_mutate(dna_crossover(parents[:]))
+    for i in 0..<PopulationSize {
+        if i < ElitesCount do dot_init(&popu.dots[i])
+        else {
+            parents: [2]Dna
+            for &parent in parents do parent = tournament_select(popu.dots, popu^)
+            dot_init(&popu.dots[i])
+            dna_crossover(&popu.dots[i].dna, parents[:])
+            dna_mutate(&popu.dots[i].dna)
+        }
     }
 }
 
@@ -60,12 +74,20 @@ Population :: struct {
 
 population_init :: proc(popu: ^Population) {
     popu.alive_count = PopulationSize
-    if popu.dots != nil do delete_slice(popu.dots, context.temp_allocator)
-    popu.dots = make_slice([]Dot, PopulationSize, context.temp_allocator)
+    if popu.dots != nil do delete(popu.dots)
+    popu.dots = make([]Dot, PopulationSize)
     for &dot in popu.dots {
         dot_init(&dot)
+        dna_init(&dot.dna)
         gen_moves(dot.dna.moves[:])
     }
+}
+
+population_deinit :: proc(popu: ^Population) {
+    for &dot in popu.dots {
+        delete(dot.dna.moves)
+    }
+    delete(popu.dots)
 }
 
 population_update :: proc(popu: ^Population, target: Target, dt: f32) {
@@ -81,21 +103,22 @@ population_update :: proc(popu: ^Population, target: Target, dt: f32) {
 
 population_draw :: proc(popu: Population) {
     text_size := i32(16)
+    text: cstring
     for dot, i in popu.dots {
         dot_draw(dot, i == popu.best_index)
     }
-    gen := rl.TextFormat("Gen: %d", popu.gen)
-    rl.DrawText(gen, 10, 10, text_size, rl.RAYWHITE)
+    text = rl.TextFormat("Gen: %d", popu.gen)
+    rl.DrawText(text, 10, 10, text_size, rl.RAYWHITE)
 
-    alive := rl.TextFormat("Alive: %d", popu.alive_count)
-    rl.DrawText(alive, 10, 30, text_size, rl.RAYWHITE)
+    text = rl.TextFormat("Alive: %d", popu.alive_count)
+    rl.DrawText(text, 10, 30, text_size, rl.RAYWHITE)
 
-    finished := rl.TextFormat("Finished: %d", popu.finished_count)
-    rl.DrawText(finished, 10, 50, text_size, rl.RAYWHITE)
+    text = rl.TextFormat("Finished: %d", popu.finished_count)
+    rl.DrawText(text, 10, 50, text_size, rl.RAYWHITE)
 
-    avg := rl.TextFormat("Avg Fit: %f", popu.avg_fitness)
-    rl.DrawText(avg, 10, 70, text_size, rl.RAYWHITE)
+    text = rl.TextFormat("Avg Fit: %f", popu.avg_fitness)
+    rl.DrawText(text, 10, 70, text_size, rl.RAYWHITE)
 
-    max := rl.TextFormat("Max Fit: %f", popu.max_fitness)
-    rl.DrawText(max, 10, 90, text_size, rl.RAYWHITE)
+    text = rl.TextFormat("Max Fit: %f", popu.max_fitness)
+    rl.DrawText(text, 10, 90, text_size, rl.RAYWHITE)
 }

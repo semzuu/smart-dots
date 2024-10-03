@@ -3,8 +3,9 @@ package main
 import rl "vendor:raylib"
 
 PopulationSize :: 100
+ElitesCount :: 1
 MovesCount :: 5000
-MutationRate :: 0.005
+MutationRate :: 0.01
 Speed :: 10
 
 main :: proc() {
@@ -14,17 +15,18 @@ main :: proc() {
     target.radius = 20
     popu: Population
     population_init(&popu)
+    defer population_deinit(&popu)
 
     rl.InitWindow(600, 600, "Smart Dots")
     defer rl.CloseWindow()
 
     for !rl.WindowShouldClose() {
-        free(context.temp_allocator.data)
+        free_all(context.allocator)
+        dt := rl.GetFrameTime()
         target.pos = {
             f32(rl.GetScreenWidth() / 2),
             50,
         }
-        dt := rl.GetFrameTime()
         population_update(&popu, target, dt)
         rl.BeginDrawing()
         rl.ClearBackground(rl.GetColor(0x181818ff))

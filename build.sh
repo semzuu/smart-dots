@@ -2,4 +2,4 @@
 
 set -xe
 
-odin build src -strict-style -out:smart_dots -o:speed -vet
+odin build src -strict-style -vet -out:smart_dots -o:speed

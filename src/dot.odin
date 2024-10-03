@@ -20,7 +20,7 @@ gen_moves :: proc(moves: [][2]f32) {
 calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
     fitness: f32
     fitness = 1 / rl.Vector2DistanceSqrt(target.pos, dot.pos)
-    fitness *= fitness
+    fitness *= 1e2
     if dot.finished {
         fitness += 1 / f32(dot.dna.step)
         fitness *= 1e3
@@ -36,15 +36,16 @@ Dot :: struct {
 }
 
 dot_init :: proc(dot: ^Dot) {
+    old_moves := dot.dna.moves
     temp := Dot{
         alive = true,
         pos = {
             f32(rl.GetScreenWidth() / 2),
-            f32(rl.GetScreenHeight() - 10),
+            f32(rl.GetScreenHeight() - 50),
         },
     }
-    dna_init(&temp.dna)
     dot^ = temp
+    dot.dna.moves = old_moves
 }
 
 dot_draw :: proc(dot: Dot, best: bool = false) {
