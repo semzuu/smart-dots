@@ -37,7 +37,10 @@ Dot :: struct {
 dot_init :: proc(dot: ^Dot) {
     temp := Dot{
         alive = true,
-        pos = {300, 600 - 50},
+        pos = {
+            f32(rl.GetScreenWidth() / 2),
+            f32(rl.GetScreenHeight() - 10),
+        },
     }
     dna_init(&temp.dna)
     dot^ = temp
@@ -60,7 +63,7 @@ dot_update :: proc(dot: ^Dot, target: Target, dt: f32) {
         else do dot.alive = false
         dot.pos += dot.vel
         dot.vel += dot.acc * dt
-        dot.vel = linalg.clamp(dot.vel, -5, 5)
+        dot.vel = linalg.clamp(dot.vel, -Speed, Speed)
         if !rl.CheckCollisionPointRec(dot.pos, {0, 0, f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())}) do dot.alive = false
         if rl.CheckCollisionPointCircle(dot.pos, target.pos, target.radius) {
             dot.alive = false

@@ -4,16 +4,14 @@ import rl "vendor:raylib"
 
 PopulationSize :: 100
 MovesCount :: 5000
-MutationRate :: 0.02
+MutationRate :: 0.01
 Speed :: 5
 
 main :: proc() {
     rl.SetTraceLogLevel(.ERROR)
 
-    target := Target{
-        {300, 100},
-        20,
-    }
+    target: Target
+    target.radius = 20
     popu: Population
     population_init(&popu)
 
@@ -21,6 +19,10 @@ main :: proc() {
     defer rl.CloseWindow()
 
     for !rl.WindowShouldClose() {
+        target.pos = {
+            f32(rl.GetScreenWidth() / 2),
+            50,
+        }
         dt := rl.GetFrameTime()
         population_update(&popu, target, dt)
         rl.BeginDrawing()
