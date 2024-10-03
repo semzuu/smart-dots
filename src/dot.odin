@@ -1,7 +1,5 @@
 package main
 
-import "core:fmt"
-import "core:math"
 import "core:math/rand"
 import "core:math/linalg"
 import rl "vendor:raylib"
@@ -21,9 +19,12 @@ gen_moves :: proc(moves: [][2]f32) {
 
 calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
     fitness: f32
-    fitness = 1 / rl.Vector2Distance(target.pos, dot.pos)
-    fitness *= 1e4
-    if dot.finished do fitness *= 10
+    fitness = 1 / rl.Vector2DistanceSqrt(target.pos, dot.pos)
+    fitness *= fitness
+    if dot.finished {
+        fitness += 1 / f32(dot.dna.step)
+        fitness *= 1e3
+    } 
     return fitness
 }
 

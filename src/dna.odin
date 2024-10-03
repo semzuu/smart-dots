@@ -9,8 +9,8 @@ Dna :: struct {
 
 dna_init :: proc(dna: ^Dna) {
     dna.step = 0
-    if dna.moves != nil do delete_slice(dna.moves)
-    dna.moves = make_slice([][2]f32, MovesCount)
+    if dna.moves != nil do delete_slice(dna.moves, context.temp_allocator)
+    dna.moves = make_slice([][2]f32, MovesCount, context.temp_allocator)
 }
 
 dna_mutate :: proc(dna: Dna) -> Dna {

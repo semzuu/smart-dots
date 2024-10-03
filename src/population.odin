@@ -1,8 +1,7 @@
 package main
 
-import "core:math"
+import "core:slice"
 import "core:math/rand"
-import "core:fmt"
 import rl "vendor:raylib"
 
 roulette_select :: proc(pool: []Dot, popu: Population) -> Dna {
@@ -38,10 +37,13 @@ next_gen :: proc(popu: ^Population) {
         popu.alive_count = PopulationSize
         popu.gen += 1
     }
-    pool := popu.dots
-    best_moves := pool[popu.best_index].dna.moves
+    best_moves := popu.dots[popu.best_index].dna.moves
     dot_init(&popu.dots[0])
     popu.dots[0].dna.moves = best_moves
+    pool := popu.dots
+    slice.sort_by(pool, proc(i, j: Dot) -> bool {
+        return i.fitness < j.fitness
+    })
     for count in 1..<PopulationSize {
         parents: [2]Dna
         for &parent in parents do parent = roulette_select(pool, popu^)
@@ -58,8 +60,8 @@ Population :: struct {
 
 population_init :: proc(popu: ^Population) {
     popu.alive_count = PopulationSize
-    if popu.dots != nil do delete_slice(popu.dots)
-    popu.dots = make_slice([]Dot, PopulationSize)
+    if popu.dots != nil do delete_slice(popu.dots, context.temp_allocator)
+    popu.dots = make_slice([]Dot, PopulationSize, context.temp_allocator)
     for &dot in popu.dots {
         dot_init(&dot)
         gen_moves(dot.dna.moves[:])
@@ -78,21 +80,22 @@ population_update :: proc(popu: ^Population, target: Target, dt: f32) {
 }
 
 population_draw :: proc(popu: Population) {
+    text_size := i32(16)
     for dot, i in popu.dots {
         dot_draw(dot, i == popu.best_index)
     }
     gen := rl.TextFormat("Gen: %d", popu.gen)
-    rl.DrawText(gen, 10, 10, 16, rl.RAYWHITE)
+    rl.DrawText(gen, 10, 10, text_size, rl.RAYWHITE)
 
     alive := rl.TextFormat("Alive: %d", popu.alive_count)
-    rl.DrawText(alive, 10, 30, 16, rl.RAYWHITE)
+    rl.DrawText(alive, 10, 30, text_size, rl.RAYWHITE)
 
     finished := rl.TextFormat("Finished: %d", popu.finished_count)
-    rl.DrawText(finished, 10, 50, 16, rl.RAYWHITE)
+    rl.DrawText(finished, 10, 50, text_size, rl.RAYWHITE)
 
-    avg := rl.TextFormat("Avg Fit: %.2f", popu.avg_fitness)
-    rl.DrawText(avg, 10, 70, 16, rl.RAYWHITE)
+    avg := rl.TextFormat("Avg Fit: %f", popu.avg_fitness)
+    rl.DrawText(avg, 10, 70, text_size, rl.RAYWHITE)
 
-    max := rl.TextFormat("Max Fit: %.2f", popu.max_fitness)
-    rl.DrawText(max, 10, 90, 16, rl.RAYWHITE)
+    max := rl.TextFormat("Max Fit: %f", popu.max_fitness)
+    rl.DrawText(max, 10, 90, text_size, rl.RAYWHITE)
 }

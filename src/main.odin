@@ -4,8 +4,8 @@ import rl "vendor:raylib"
 
 PopulationSize :: 100
 MovesCount :: 5000
-MutationRate :: 0.01
-Speed :: 5
+MutationRate :: 0.005
+Speed :: 10
 
 main :: proc() {
     rl.SetTraceLogLevel(.ERROR)
@@ -19,6 +19,7 @@ main :: proc() {
     defer rl.CloseWindow()
 
     for !rl.WindowShouldClose() {
+        free(context.temp_allocator.data)
         target.pos = {
             f32(rl.GetScreenWidth() / 2),
             50,
