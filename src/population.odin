@@ -47,12 +47,14 @@ next_gen :: proc(popu: ^Population) {
 
 Population :: struct {
     gen, alive_count, finished_count, best_index: int,
-    dots: [PopulationSize]Dot,
+    dots: []Dot,
     max_fitness, avg_fitness, sum_fitness: f32,
 }
 
 population_init :: proc(popu: ^Population) {
     popu.alive_count = PopulationSize
+    if popu.dots != nil do delete_slice(popu.dots)
+    popu.dots = make_slice([]Dot, PopulationSize)
     for &dot in popu.dots {
         dot_init(&dot)
         gen_moves(dot.dna.moves[:])

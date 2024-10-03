@@ -2,10 +2,9 @@ package main
 
 import rl "vendor:raylib"
 
-PopulationSize :: 50
-MovesCount :: 500
-MutationRate :: 0.01
-Lifespan :: 5
+PopulationSize :: 100
+MovesCount :: 5000
+MutationRate :: 0.02
 Speed :: 5
 
 main :: proc() {

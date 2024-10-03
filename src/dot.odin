@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:math"
 import "core:math/rand"
 import "core:math/linalg"
 import rl "vendor:raylib"
@@ -20,14 +21,14 @@ gen_moves :: proc(moves: [][2]f32) {
 
 calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
     fitness: f32
-    fitness += 1 / rl.Vector2LengthSqr(target.pos - dot.pos)
-    fitness *= 1e+6
+    fitness = 1 / rl.Vector2Distance(target.pos, dot.pos)
+    fitness *= 1e2
     if dot.finished do fitness *= 10
     return fitness
 }
 
 Dot :: struct {
-    life, fitness: f32,
+    fitness: f32,
     pos, vel, acc: [2]f32,
     alive, finished: bool,
     dna: Dna,
@@ -37,8 +38,8 @@ dot_init :: proc(dot: ^Dot) {
     temp := Dot{
         alive = true,
         pos = {300, 600 - 50},
-        life = Lifespan,
     }
+    dna_init(&temp.dna)
     dot^ = temp
 }
 
@@ -56,12 +57,10 @@ dot_update :: proc(dot: ^Dot, target: Target, dt: f32) {
     if dot.alive {
         dot.acc = dot.dna.moves[dot.dna.step]
         if dot.dna.step < MovesCount - 1 do dot.dna.step += 1
-        else do dot.acc = {0, 0}
+        else do dot.alive = false
         dot.pos += dot.vel
         dot.vel += dot.acc * dt
         dot.vel = linalg.clamp(dot.vel, -5, 5)
-        dot.life -= dt
-        if dot.life <= 0 do dot.alive = false
         if !rl.CheckCollisionPointRec(dot.pos, {0, 0, f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())}) do dot.alive = false
         if rl.CheckCollisionPointCircle(dot.pos, target.pos, target.radius) {
             dot.alive = false
