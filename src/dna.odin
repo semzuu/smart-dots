@@ -23,3 +23,13 @@ dna_mutate :: proc(dna: Dna) -> Dna {
     }
     return new_dna
 }
+
+dna_crossover :: proc(parents: []Dna) -> Dna {
+    baby: Dna
+    dna_init(&baby)
+    for i in 0..<MovesCount {
+        selected := rand.choice(parents)
+        baby.moves[i] = selected.moves[i]
+    }
+    return baby
+}

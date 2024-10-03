@@ -22,7 +22,7 @@ gen_moves :: proc(moves: [][2]f32) {
 calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
     fitness: f32
     fitness = 1 / rl.Vector2Distance(target.pos, dot.pos)
-    fitness *= 1e2
+    fitness *= 1e4
     if dot.finished do fitness *= 10
     return fitness
 }

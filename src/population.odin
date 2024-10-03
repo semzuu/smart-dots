@@ -5,6 +5,16 @@ import "core:math/rand"
 import "core:fmt"
 import rl "vendor:raylib"
 
+roulette_select :: proc(pool: []Dot, popu: Population) -> Dna {
+    for {
+        parent := rand.int_max(PopulationSize)
+        chance := rand.float32()
+        if chance < pool[parent].fitness / popu.sum_fitness {
+            return pool[parent].dna
+        }
+    }
+}
+
 update_stats :: proc(popu: ^Population, target: Target) {
     popu.max_fitness, popu.avg_fitness, popu.sum_fitness = f32(0), f32(0), f32(0)
     alive, finished: int
@@ -33,15 +43,10 @@ next_gen :: proc(popu: ^Population) {
     dot_init(&popu.dots[0])
     popu.dots[0].dna.moves = best_moves
     for count in 1..<PopulationSize {
-        for {
-            parent := rand.int_max(PopulationSize)
-            chance := rand.float32()
-            if chance < pool[parent].fitness / popu.sum_fitness {
-                dot_init(&popu.dots[count])
-                popu.dots[count].dna = dna_mutate(pool[parent].dna)
-                break
-            }
-        }
+        parents: [2]Dna
+        for &parent in parents do parent = roulette_select(pool, popu^)
+        dot_init(&popu.dots[count])
+        popu.dots[count].dna = dna_mutate(dna_crossover(parents[:]))
     }
 }
 
