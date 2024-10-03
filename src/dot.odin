@@ -5,15 +5,29 @@ import "core:math/rand"
 import "core:math/linalg"
 import rl "vendor:raylib"
 
+random_vector :: proc() -> [2]f32 {
+    return {
+        rand.float32() * 2 * Speed - Speed,
+        rand.float32() * 2 * Speed - Speed,
+    }
+}
 
-Dna :: struct {
-    moves: [MovesCount][2]f32,
-    step: i32,
-    fitness: f32,
+gen_moves :: proc(moves: [][2]f32) {
+    for &move in moves {
+        move = random_vector()
+    }
+}
+
+calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
+    fitness: f32
+    fitness += 1 / rl.Vector2LengthSqr(target.pos - dot.pos)
+    fitness *= 1e+6
+    if dot.finished do fitness *= 10
+    return fitness
 }
 
 Dot :: struct {
-    life: f32,
+    life, fitness: f32,
     pos, vel, acc: [2]f32,
     alive, finished: bool,
     dna: Dna,
@@ -54,25 +68,4 @@ dot_update :: proc(dot: ^Dot, target: Target, dt: f32) {
             dot.finished = true
         }
     }
-}
-
-gen_moves :: proc(moves: [][2]f32) {
-    for &move in moves {
-        move = random_vector()
-    }
-}
-
-random_vector :: proc() -> [2]f32 {
-    return {
-        rand.float32() * 2 * Speed - Speed,
-        rand.float32() * 2 * Speed - Speed,
-    }
-}
-
-calculate_fitness :: proc(dot: Dot, target: Target) -> f32 {
-    fitness: f32
-    fitness += 1 / rl.Vector2LengthSqr(target.pos - dot.pos)
-    fitness *= 1e+6
-    if dot.finished do fitness *= 10
-    return fitness
 }

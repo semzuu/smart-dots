@@ -5,7 +5,7 @@ import rl "vendor:raylib"
 PopulationSize :: 50
 MovesCount :: 500
 MutationRate :: 0.01
-Lifespan :: 10
+Lifespan :: 5
 Speed :: 5
 
 main :: proc() {
