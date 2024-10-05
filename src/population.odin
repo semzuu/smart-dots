@@ -51,7 +51,7 @@ next_gen :: proc(popu: ^Population) {
         popu.alive_count = PopulationSize
         popu.gen += 1
     }
-    slice.sort_by(popu.dots, proc(i, j: Dot) -> bool {
+    slice.reverse_sort_by(popu.dots, proc(i, j: Dot) -> bool {
         return i.fitness < j.fitness
     })
     for i in 0..<PopulationSize {
@@ -74,7 +74,8 @@ Population :: struct {
 
 population_init :: proc(popu: ^Population) {
     popu.alive_count = PopulationSize
-    if popu.dots != nil do delete(popu.dots)
+    popu.gen = 0
+    if popu.dots != nil do population_deinit(popu)
     popu.dots = make([]Dot, PopulationSize)
     for &dot in popu.dots {
         dot_init(&dot)
@@ -90,10 +91,10 @@ population_deinit :: proc(popu: ^Population) {
     delete(popu.dots)
 }
 
-population_update :: proc(popu: ^Population, target: Target, dt: f32) {
+population_update :: proc(popu: ^Population, target: Target, obstacles: [dynamic]Obstacle, dt: f32) {
     if popu.alive_count > 0 {
         for &dot in popu.dots {
-            dot_update(&dot, target, dt)
+            dot_update(&dot, target, obstacles, dt)
         }
         update_stats(popu, target)
     } else {
