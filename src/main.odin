@@ -1,12 +1,13 @@
 package main
 
+import "core:math/linalg"
 import rl "vendor:raylib"
 
 Obstacle :: rl.Rectangle
 
-PopulationSize :: 50
+PopulationSize :: 100
 ElitesCount :: 2
-MovesCount :: 2000
+MovesCount :: 5000
 MutationRate :: 0.01
 Speed :: 10
 
@@ -41,17 +42,23 @@ main :: proc() {
         if rl.IsMouseButtonReleased(.LEFT) {
             hold = false
             end_pos := rl.GetMousePosition()
-            if start_pos.x > end_pos.x || start_pos.y > end_pos.y do start_pos, end_pos = end_pos, start_pos
+            g := linalg.greater_than_equal_array(start_pos, end_pos)
+            if g[0] || g[1] do start_pos, end_pos = end_pos, start_pos
             append(&obstacles, Obstacle{start_pos.x, start_pos.y, end_pos.x-start_pos.x, end_pos.y-start_pos.y})
         }
         if rl.IsKeyPressed(.C) do clear(&obstacles)
-        if rl.IsKeyPressed(.R) do population_init(&popu)
+        if rl.IsKeyPressed(.R) {
+            population_init(&popu)
+        } 
         if rl.IsMouseButtonReleased(.RIGHT) do target.pos = rl.GetMousePosition()
-        if !paused do population_update(&popu, target, obstacles, dt)
+        if !paused {
+            population_update(&popu, target, obstacles, dt)
+        }
         rl.BeginDrawing()
         rl.ClearBackground(rl.GetColor(0x181818ff))
         if hold {
-            rec := Obstacle{start_pos.x, start_pos.y, rl.GetMousePosition().x-start_pos.x, rl.GetMousePosition().y-start_pos.y}
+            mouse := rl.GetMousePosition()
+            rec := Obstacle{start_pos.x, start_pos.y, mouse.x-start_pos.x, mouse.y-start_pos.y}
             rl.DrawRectangleRec(rec, rl.ColorAlpha(rl.BLUE, 0.3))
         }
         target_draw(target)

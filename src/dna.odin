@@ -4,11 +4,9 @@ import "core:math/rand"
 
 Dna :: struct {
     moves: [][2]f32,
-    step: i32,
 }
 
 dna_init :: proc(dna: ^Dna) {
-    dna.step = 0
     if dna.moves != nil do delete(dna.moves)
     dna.moves = make([][2]f32, MovesCount)
 }
@@ -22,8 +20,12 @@ dna_mutate :: proc(dna: ^Dna) {
 }
 
 dna_crossover :: proc(baby: ^Dna, parents: []Dna) {
+    mid := rand.int_max(MovesCount)
     for i in 0..<MovesCount {
-        selected := rand.choice(parents)
-        baby.moves[i] = selected.moves[i]
+        if i < mid {
+            baby.moves[i] = parents[0].moves[i]
+        } else {
+            baby.moves[i] = parents[1].moves[i]
+        }
     }
 }
